@@ -5,12 +5,26 @@ import (
 	"bytes"
 	"errors"
 	"fmt"
+	"github.com/PuerkitoBio/goquery"
 	"io"
 	"io/ioutil"
 	"net/http"
 	"os"
 	"strings"
 )
+
+//get response body form url
+func GetPageFromUrl(url string) *goquery.Document {
+	res, error := http.Get(url)
+	if error != nil {
+		fmt.Print(error)
+	}
+	doc, error2 := goquery.NewDocumentFromReader(res.Body)
+	if error2 != nil {
+		fmt.Println(error2)
+	}
+	return doc
+}
 
 func IsExist(dir string) bool {
 	_, err := os.Stat(dir)
@@ -20,6 +34,7 @@ func IsExist(dir string) bool {
 	return os.IsExist(err)
 }
 
+//download from url
 func DownLoad(filepath string, url string) error {
 	trueOrFalse := IsExist(filepath)
 	if trueOrFalse {
@@ -46,6 +61,7 @@ func DownLoad(filepath string, url string) error {
 	return nil
 }
 
+//int config file
 func InitConfig(path string) map[string]string {
 	var resultMap = make(map[string]string)
 	file, error := os.Open(path)

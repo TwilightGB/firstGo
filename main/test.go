@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"firstGo/rule"
-	"firstGo/utils"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"io"

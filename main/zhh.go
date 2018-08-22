@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"firstGo/goUtils"
 	"firstGo/utils"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
@@ -54,14 +55,8 @@ func main() {
 	filepath := "D:\\temp\\cq.txt"
 	var context string
 	for i := 0; i < 225; i++ {
-		res, error := http.Get(url)
-		if error != nil {
-			fmt.Print(error)
-		}
-		doc, error2 := goquery.NewDocumentFromReader(res.Body)
-		if error2 != nil {
-			fmt.Println(error2)
-		}
+		var doc goquery.Document
+		doc = goUtils.GetPageFromUrl(url)
 		context += " 【 " + doc.Find("h1").Text() + " 】 "
 		doc.Find("#BookText").Each(func(i int, selection *goquery.Selection) {
 			text := selection.Text()
