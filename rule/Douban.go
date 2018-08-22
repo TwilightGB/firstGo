@@ -1,26 +1,26 @@
 package rule
 
 import (
-	"strings"
-	"net/url"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
+	"net/url"
 	"strconv"
+	"strings"
 )
 
 type Douban struct {
-	url string
+	url      string
 	filepath string
-	page int
+	page     int
 }
 
-func (d *Douban) UrlRule() (url string){
+func (d *Douban) UrlRule() (url string) {
 	return "https://book.douban.com/tag/Programming?start=20&type=T"
 }
 func (d *Douban) PageRule(currentPage int) (page string) {
-	return "start="+strconv.Itoa(currentPage+20)+"&type=T"
+	return "start=" + strconv.Itoa(currentPage+20) + "&type=T"
 }
-func (d *Douban) ImageRule(doc *goquery.Document, f func(image string)){
+func (d *Douban) ImageRule(doc *goquery.Document, f func(image string)) {
 
 	doc.Find(".pic").Each(func(i int, contentSelection *goquery.Selection) {
 		imgpath, exist := contentSelection.Find("img").Attr("src")
@@ -31,12 +31,12 @@ func (d *Douban) ImageRule(doc *goquery.Document, f func(image string)){
 	})
 }
 func (d *Douban) ParseUrl(imageUrl string) string {
-	lastIndex:=strings.LastIndex(imageUrl, "/")
-	name:=imageUrl[lastIndex+1: len(imageUrl)]
+	lastIndex := strings.LastIndex(imageUrl, "/")
+	name := imageUrl[lastIndex+1 : len(imageUrl)]
 	u, err := url.Parse(imageUrl)
 	if err != nil {
 		panic(err)
 	}
 	fmt.Println(u.Path)
-	return  name;
+	return name
 }
