@@ -34,7 +34,8 @@ func (im *image) getImage(surl string) []string {
 func main() {
 	ch := make(chan string, 100)
 	go func(ch chan string) {
-		file, error := os.Open("E:\\mygo\\src\\firstGo\\config.properties")
+		uri := "E:\\mygo\\src\\firstGo\\config.properties"
+		file, error := os.Open(uri)
 		if error != nil {
 			panic(error)
 		}
@@ -60,18 +61,13 @@ func main() {
 	if ok != false {
 		fmt.Println(x)
 	}
-	fmt.Println("=====")
 	dMap := goUtils.InitConfig("E:\\mygo\\src\\firstGo\\config.properties")
-	for key, value := range dMap {
-		fmt.Println(key + "  " + value)
-	}
-
 	var resultList = make([]string, 0)
 	//images:=&image{surl:"",filepath:"",page:1,ImageRule:&rule.Douban{}}
 	//fmt.Println(images)
 	image := new(image)
-	image.surl = "https://book.douban.com/tag/Programming?"
-	image.filepath = "D:\\temp\\"
+	image.surl = dMap["purl"]
+	image.filepath = dMap["filepath"]
 	image.page = 20
 	image.ImageRule = &rule.Douban{}
 	for i := 0; i < 3; i++ {

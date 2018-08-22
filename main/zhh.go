@@ -1,62 +1,20 @@
 package main
 
 import (
-	"bufio"
 	"firstGo/goUtils"
-	"firstGo/utils"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
-	"log"
-	"net/http"
-	"os"
 	"strconv"
 	"strings"
 )
 
-func writeFile(path string, context string) {
-	trueOrfalse := goUtils.IsExist(path)
-	if trueOrfalse {
-		file := funcName(path, context)
-		defer file.Close()
-	} else {
-		file, errorCreate := os.Create(path)
-		if errorCreate != nil {
-			return
-		}
-		// 查找文件末尾的偏移量
-		// 从末尾的偏移量开始写入内容
-		//n, _ := file.Seek(0, os.SEEK_END)
-		//_, _ = file.WriteAt([]byte(context), n)
-		funcName(path, context)
-		defer file.Close()
-	}
-}
-
-func funcName(path string, context string) *os.File {
-	file, err := os.OpenFile(path, os.O_WRONLY, 0666)
-	if err != nil {
-		log.Fatal(err)
-	}
-	bufferedWriter := bufio.NewWriter(file)
-	//bytesWritten, err := bufferedWriter.Write([]byte{})
-	bytesWritten, err := bufferedWriter.WriteString(context)
-	fmt.Printf("Bytes written: %d\n", bytesWritten)
-	//unflushedBufferSize := bufferedWriter.Buffered()
-	//log.Printf("Bytes buffered: %d\n", unflushedBufferSize)
-	bufferedWriter.Flush()
-	if err != nil {
-		log.Fatal(err)
-	}
-	return file
-}
 func main() {
 	var url string
 	url = "http://www.zanghaihua.org/645.html"
-	filepath := "D:\\temp\\cq.txt"
+	filepath := "D:\\temp\\cq1.txt"
 	var context string
-	for i := 0; i < 225; i++ {
-		var doc goquery.Document
-		doc = goUtils.GetPageFromUrl(url)
+	for i := 0; i < 5; i++ {
+		doc := goUtils.GetPageFromUrl(url)
 		context += " 【 " + doc.Find("h1").Text() + " 】 "
 		doc.Find("#BookText").Each(func(i int, selection *goquery.Selection) {
 			text := selection.Text()
@@ -73,7 +31,7 @@ func main() {
 			fmt.Println(i)
 			break
 		}
-		writeFile(filepath, context)
+		goUtils.WriteFile(filepath, context)
 	}
 
 }
