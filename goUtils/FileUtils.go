@@ -14,9 +14,22 @@ import (
 	"strings"
 )
 
+func BuildRequest(url string) *http.Request {
+	req, err := http.NewRequest("GET", url, nil)
+	if err != nil {
+		panic(err)
+	}
+
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.152 Safari/537.36")
+	//req.Header.Set("Cookie", p.userCookie)
+	return req
+}
+
 //get response body form url
 func GetPageFromUrl(url string) *goquery.Document {
-	res, error := http.Get(url)
+	req := BuildRequest(url)
+	res, error := http.DefaultClient.Do(req)
+	//res, error := http.Get(url)
 	if error != nil {
 		fmt.Print(error)
 	}
@@ -91,6 +104,28 @@ func InitConfig(path string) map[string]string {
 			continue
 		}
 		value := strings.TrimSpace(sLine[index+1 : len(sLine)])
+		if len(value) == 0 {
+			continue
+		}
+		resultMap[key] = value
+	}
+	return resultMap
+}
+
+func ParseDate(str []string) map[string]string {
+	var resultMap = make(map[string]string)
+	for _, str := range str {
+		strings.TrimSpace(str)
+		index := strings.Index(str, ":")
+		if index < 0 {
+			continue
+		}
+
+		key := strings.TrimSpace(str[:index])
+		if len(key) == 0 {
+			continue
+		}
+		value := strings.TrimSpace(str[index+1 : len(str)])
 		if len(value) == 0 {
 			continue
 		}
