@@ -32,32 +32,27 @@ func main() {
 	var page = 20
 	var url = book.UrlRule()
 	for i := 0; i < 3; i++ {
-		list := getPageList(book, url)
-		parseBook(list)
+		ch1 := make(chan string, 1024)
+		doc := goUtils.GetPageFromUrl(url)
+		list := make([]string, 0)
+		go func() {
+			book.SubjectItems(doc, func(image string) {
+				ch1 <- image
+				list = append(list, image)
+			})
+			close(ch1)
+		}()
+		for value := range ch1 {
+			newBook := entity.AppendDetail(value, entity.NewBook())
+			newBook.CreatedAt = time.Now()
+			newBook.UpdatedAt = time.Now()
+			if err := db.Create(newBook).Error; err != nil {
+				return
+			}
+		}
 		url = "https://book.douban.com/tag/Programming?" + book.PageRule(page)
 		page += 20
 	}
 	elapsed := time.Since(startTime)
 	fmt.Println(elapsed)
-}
-
-func parseBook(list []string) {
-	for _, value := range list {
-		newBook := entity.AppendDetail(value, entity.NewBook())
-		newBook.CreatedAt = time.Now()
-		newBook.UpdatedAt = time.Now()
-		if err := db.Create(newBook).Error; err != nil {
-			return
-		}
-		//fmt.Println(mapInfo)
-	}
-}
-
-func getPageList(book *entity.Book, url string) []string {
-	doc := goUtils.GetPageFromUrl(url)
-	list := make([]string, 0)
-	book.SubjectItems(doc, func(image string) {
-		list = append(list, image)
-	})
-	return list
 }
