@@ -4,12 +4,15 @@ import (
 	"bufio"
 	"bytes"
 	"errors"
+	proxy2 "firstGo/proxy"
 	"fmt"
 	"github.com/PuerkitoBio/goquery"
 	"io"
 	"io/ioutil"
 	"log"
+	"math/rand"
 	"net/http"
+	"net/url"
 	"os"
 	"strings"
 )
@@ -19,14 +22,12 @@ func BuildRequest(url string) *http.Request {
 	if err != nil {
 		panic(err)
 	}
-
 	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/42.0.2311.152 Safari/537.36")
 	//req.Header.Set("Cookie", p.userCookie)
 	return req
 }
 
-//get response body form url
-func GetPageFromUrl(url string) *goquery.Document {
+func GetPageFromUrlOrigin(url string) *goquery.Document {
 	req := BuildRequest(url)
 	res, error := http.DefaultClient.Do(req)
 	//res, error := http.Get(url)
@@ -38,6 +39,34 @@ func GetPageFromUrl(url string) *goquery.Document {
 		fmt.Println(error2)
 	}
 	return doc
+}
+
+//get response body form url
+func GetPageFromUrl(url_req string) *goquery.Document {
+	client := SetProxy()
+	req := BuildRequest(url_req)
+	res, error := client.Do(req)
+	//res, error := http.Get(url)
+	if error != nil {
+		fmt.Print(error)
+	}
+	doc, error2 := goquery.NewDocumentFromReader(res.Body)
+	if error2 != nil {
+		fmt.Println(error2)
+	}
+	return doc
+}
+
+func SetProxy() *http.Client {
+	prox := proxy2.New()
+	asize := prox.AviableIp
+	proxyUrl_ := prox.AviableIp[rand.Intn(len(asize)-1)]
+	proxy := func(_ *http.Request) (*url.URL, error) {
+		return url.Parse(proxyUrl_)
+	}
+	transport := &http.Transport{Proxy: proxy}
+	client := &http.Client{Transport: transport}
+	return client
 }
 
 func IsExist(dir string) bool {

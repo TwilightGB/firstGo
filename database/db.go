@@ -27,7 +27,7 @@ type MyTable struct {
 
 var (
 	err                error
-	db                 *sql.DB
+	dbs                *sql.DB
 	once               sync.Once
 	max_allowed_packet = mysqlmaxallowedpacket - 1024
 	maxConnChan        = make(chan bool, mysqlconncap) //最大执行数限制
@@ -38,8 +38,8 @@ func DB() (*sql.DB, error) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	db = dbmysql
-	return db, err
+	dbs = dbmysql
+	return dbs, err
 }
 func DbClose() {
 	db.Close()
@@ -103,7 +103,7 @@ func (self *MyTable) Create() error {
 	// debug
 	// println("Create():", self.sqlCode)
 
-	_, err := db.Exec(self.sqlCode)
+	_, err := dbs.Exec(self.sqlCode)
 	return err
 }
 
@@ -113,7 +113,7 @@ func (self *MyTable) Truncate() error {
 	defer func() {
 		<-maxConnChan
 	}()
-	_, err := db.Exec(`TRUNCATE TABLE ` + self.tableName)
+	_, err := dbs.Exec(`TRUNCATE TABLE ` + self.tableName)
 	return err
 }
 
@@ -192,7 +192,7 @@ func (self *MyTable) FlushInsert() error {
 	// debug
 	// println("FlushInsert():", self.sqlCode)
 
-	_, err := db.Exec(self.sqlCode, self.args...)
+	_, err := dbs.Exec(self.sqlCode, self.args...)
 	return err
 }
 
@@ -207,7 +207,7 @@ func (self *MyTable) SelectAll() (*sql.Rows, error) {
 	defer func() {
 		<-maxConnChan
 	}()
-	return db.Query(self.sqlCode)
+	return dbs.Query(self.sqlCode)
 }
 
 func wrapSqlKey(s string) string {

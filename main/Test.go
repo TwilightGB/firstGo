@@ -8,6 +8,7 @@ import (
 	"github.com/PuerkitoBio/goquery"
 	"io"
 	"os"
+	"runtime"
 )
 
 type image struct {
@@ -32,6 +33,7 @@ func (im *image) getImage(surl string) []string {
 //, strconv.FormatInt(time.Now().Unix(), 10)
 //strconv.Itoa(rand.Intn(10)) + ".jpg"
 func main() {
+	runtime.GOMAXPROCS(runtime.NumCPU())
 	ch := make(chan string, 100)
 	go func(ch chan string) {
 		uri := "E:\\mygo\\src\\firstGo\\config.properties"

@@ -8,6 +8,7 @@ import (
 	"log"
 	"strconv"
 	"strings"
+	"time"
 )
 
 type Book struct {
@@ -28,6 +29,8 @@ type Book struct {
 	Publishcomp  string  `gorm:"type:varchar(55)"`
 	Content      string  `gorm:"type:varchar(1024)"`
 	Image        string  `gorm:"type:varchar(256)"`
+	Classify     string  `gorm:"type:varchar(32)"`
+	SbuId        string  `gorm:"type:varchar(32)"`
 }
 
 func NewBook() *Book {
@@ -61,11 +64,14 @@ func (d *Book) SubjectItems(doc *goquery.Document, f func(image string)) {
 }
 
 func AppendDetail(value string, book *Book) *Book {
+	valueSplic := strings.Split(value, "/")
+	book.SbuId = valueSplic[len(valueSplic)-2]
 	docDetail := goUtils.GetPageFromUrl(value)
-	bookTitle := docDetail.Find("h1").Text()
+	bookTitle := strings.TrimSpace(docDetail.Find("h1").Text())
 	book.Title = bookTitle
 	//r.ReplaceAllString(bookName, "")
-	bookInfo := docDetail.Find("#info").Text()
+	bookInfo := strings.TrimSpace(docDetail.Find("#info").Text())
+	bookInfo = strings.Replace(bookInfo, "\n ", "", -1)
 	infoArray := strings.Split(bookInfo, "\n")
 	err := appendInfo(infoArray, book)
 	bookRating := strings.TrimSpace(docDetail.Find(".rating_num").Text())
@@ -84,6 +90,8 @@ func AppendDetail(value string, book *Book) *Book {
 	}
 	bookContext := docDetail.Find(".intro p").Text()
 	book.Content = bookContext
+	book.CreatedAt = time.Now()
+	book.UpdatedAt = time.Now()
 	fmt.Println(book)
 	return book
 }
@@ -99,6 +107,7 @@ func appendInfo(infoArray []string, book *Book) error {
 	book.Price = mapInfo["定价"]
 	book.ISBN = mapInfo["ISBN"]
 	book.Publishcomp = mapInfo["出版社"]
+	book.Classify = mapInfo["丛书"]
 	page, err := strconv.Atoi(mapInfo["页数"])
 	if err != nil {
 		log.Println(err)
